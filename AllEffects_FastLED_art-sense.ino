@@ -44,7 +44,6 @@ void loop() {
       int coolingRate = 55;
       int sparkingRate = 90;
       int speedDelay = 60;
-      Serial.println(speedDelay);
       fire(coolingRate, sparkingRate, speedDelay);
       break;
     }

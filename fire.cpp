@@ -59,12 +59,10 @@ void ignite(int sparking) {
 }
 
 void fire(int cooling, int sparking, int speedDelay) {
-  if (!timerIsRunning()) {
-    startTimer();
-  }
-  else if (!intervalHasPassed(speedDelay)) {
+  if (timerIsRunning() && !intervalHasPassed(speedDelay)) {
     return;
   }
+  startTimer();
 
   cool_down(cooling);
   heat_up();
