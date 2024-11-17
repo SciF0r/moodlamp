@@ -1,34 +1,40 @@
 #include "FastLED.h"
+#include "const.h"
+#include "fire.h"
+#include "led_helpers.h"
+#include "lgbtq.h"
+#include "timer.h"
 
-#define BRIGHTNESS 100
-#define NUM_LEDS 88
-#define PIN 5 
 #define BUTTON 2
+#define BRIGHTNESS 100
+#define LED_PIN 5
+#define LED_TYPE WS2812
 
-CRGB leds[NUM_LEDS];
 enum Effect {
+  START_OF_EFFECTS,
   FIRE,
   LGBTQ,
-  RAINBOW,
-  METEOR_RAIN,
-  TEST,
+  // RAINBOW,
+  // METEOR_RAIN,
+  // TEST,
   END_OF_EFFECTS
 };
-byte defaultEffect = TEST;
-byte selectedEffect = defaultEffect;
+static byte defaultEffect = FIRE;
+static byte selectedEffect = defaultEffect;
 
 void setup()
 {
-  FastLED.addLeds<WS2811, PIN, GRB>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<LED_TYPE, LED_PIN, GRB>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   pinMode(2, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BUTTON), changeEffect, CHANGE);
+  FastLED.clear();
 }
 
 void loop() { 
   FastLED.setBrightness(BRIGHTNESS);
 
   if (selectedEffect >= END_OF_EFFECTS) {
-    selectedEffect = defaultEffect;
+    selectedEffect = START_OF_EFFECTS+1;
   }
 
   switch(selectedEffect) {
@@ -38,40 +44,35 @@ void loop() {
       int coolingRate = 55;
       int sparkingRate = 90;
       int speedDelay = 60;
-      Fire(coolingRate, sparkingRate, speedDelay);
+      Serial.println(speedDelay);
+      fire(coolingRate, sparkingRate, speedDelay);
       break;
     }
 
     case LGBTQ:
     {
-      FadeInOut(0xe3, 0x1c, 0x79); // hot pink
-      FadeInOut(0xff, 0x00, 0x00); // red
-      FadeInOut(0xff, 0x50, 0x00); // orange
-      FadeInOut(0xff, 0x88, 0x00); // yellow
-      FadeInOut(0x00, 0xaa, 0x00); // green
-      FadeInOut(0x00, 0x6e, 0x33); // turquoise
-      FadeInOut(0x15, 0x00, 0x80); // indigo
-      FadeInOut(0x20, 0x00, 0x40); // violet
+      lgbtq();
       break;
     }
 
-    case RAINBOW:
-    {
-      int speedDelay = 20;
-      rainbowCycle(speedDelay);
-      break;
-    }
+    // case RAINBOW:
+    // {
+    //   int speedDelay = 20;
+    //   rainbowCycle(speedDelay);
+    //   break;
+    // }
 
-    case METEOR_RAIN: {
-      int meteorSize = 10;
-      int trailDecay = 64;
-      bool randomTrailDecay = true;
-      int speedDelay = 30;
-      meteorRain(0x25, 0x00, 0x05, meteorSize, trailDecay, randomTrailDecay, speedDelay);
-      break;
-    }
+    // case METEOR_RAIN:
+    // {
+    //   int meteorSize = 10;
+    //   int trailDecay = 64;
+    //   bool randomTrailDecay = true;
+    //   int speedDelay = 30;
+    //   meteorRain(0x25, 0x00, 0x05, meteorSize, trailDecay, randomTrailDecay, speedDelay);
+    //   break;
+    // }
 
-    // case 3  : {
+    // case TEST: {
     //             // HalloweenEyes - Color (red, green, blue), Size of eye, space between eyes, fade (true/false), steps, fade delay, end pause
     //             HalloweenEyes(0xff, 0x00, 0x00, 
     //                           1, 4, 
@@ -186,11 +187,14 @@ void loop() {
     //             break;
     //           }
   }
+
+  FastLED.show();
 }
 
 void changeEffect() {
   if (digitalRead(BUTTON) == HIGH) {
     selectedEffect++;
+    stopTimer();
   }
 }
 
@@ -223,25 +227,7 @@ void RGBLoop(){
   }
 }
 
-void FadeInOut(byte red, byte green, byte blue){
-  float r, g, b;
-      
-  for(int k = 0; k < 256; k=k+1) { 
-    r = (k/256.0)*red;
-    g = (k/256.0)*green;
-    b = (k/256.0)*blue;
-    setAllPixels(r,g,b);
-    showStrip();
-  }
-     
-  for(int k = 255; k >= 0; k=k-2) {
-    r = (k/256.0)*red;
-    g = (k/256.0)*green;
-    b = (k/256.0)*blue;
-    setAllPixels(r,g,b);
-    showStrip();
-  }
-}
+
 
 void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause){
   for(int j = 0; j < StrobeCount; j++) {
@@ -565,60 +551,6 @@ void theaterChaseRainbow(int SpeedDelay) {
   }
 }
 
-void Fire(int Cooling, int Sparking, int SpeedDelay) {
-  static byte heat[NUM_LEDS];
-  int cooldown;
-  
-  // Step 1.  Cool down every cell a little
-  for (int i = 0; i < NUM_LEDS; i++) {
-    cooldown = random(0, ((Cooling * 10) / NUM_LEDS) + 2);
-
-    if (cooldown > heat[i]) {
-      heat[i] = 0;
-    }
-    else {
-      heat[i] = heat[i] - cooldown;
-    }
-  }
-
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for (int k = NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
-  }
-
-  // Step 3.  Randomly ignite new 'sparks' near the bottom
-  if (random(255) < Sparking) {
-    int y = random(7);
-    heat[y] = heat[y] + random(160, 255);
-  }
-
-  // Step 4.  Convert heat to LED colors
-  for (int j = 0; j < NUM_LEDS; j++) {
-    setPixelHeatColor(j, heat[j]);
-  }
-
-  showStrip();
-  delay(SpeedDelay);
-}
-
-void setPixelHeatColor (int Pixel, byte temperature) {
-  // Scale 'heat' down from 0-255 to 0-191
-  byte t192 = round((temperature/255.0)*191);
- 
-  // calculate ramp up from
-  byte heatramp = t192 & 0x3F; // 0..63
-  heatramp <<= 2; // scale up to 0..252
- 
-  // figure out which third of the spectrum we're in:
-  if( t192 > 0x80) {                     // hottest
-    setPixel(Pixel, 255, 255, heatramp);
-  } else if( t192 > 0x40 ) {             // middle
-    setPixel(Pixel, 255, heatramp, 0);
-  } else {                               // coolest
-    setPixel(Pixel, heatramp, 0, 0);
-  }
-}
-
 void BouncingColoredBalls(int BallCount, byte colors[][3], boolean continuous) {
   float Gravity = -9.81;
   int StartHeight = 1;
@@ -723,35 +655,4 @@ void fadeToBlack(int ledNo, byte fadeValue) {
    // FastLED
    leds[ledNo].fadeToBlackBy( fadeValue );
  #endif  
-}
-
-// ***************************************
-// ** FastLed/NeoPixel Common Functions **
-// ***************************************
-
-void showStrip() {
-  #ifdef ADAFRUIT_NEOPIXEL_H 
-  strip.show();
-  #endif
-  #ifndef ADAFRUIT_NEOPIXEL_H
-  FastLED.show();
-  #endif
-}
-
-void setPixel(int Pixel, byte red, byte green, byte blue) {
-  #ifdef ADAFRUIT_NEOPIXEL_H 
-  strip.setPixelColor(Pixel, strip.Color(red, green, blue));
-  #endif
-  #ifndef ADAFRUIT_NEOPIXEL_H 
-  leds[Pixel].r = red;
-  leds[Pixel].g = green;
-  leds[Pixel].b = blue;
-  #endif
-}
-
-void setAllPixels(byte red, byte green, byte blue) {
-  for(int i = 0; i < NUM_LEDS; i++) {
-    setPixel(i, red, green, blue);
-  }
-  showStrip();
 }
