@@ -1,25 +1,38 @@
+#include "const.h"
 #include "led_helpers.h"
+#include "timer.h"
+
+static int currentLed = 0;
+const int distanceBetweenMeteors = NUM_LEDS/2;
+
+void meteorRainLoop() {
+  currentLed++;
+  if (currentLed == NUM_LEDS + distanceBetweenMeteors) {
+    currentLed = 0;
+  }
+}
 
 void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, bool meteorRandomDecay, int speedDelay) {
   if (timerIsRunning() && !intervalHasPassed(speedDelay)) {
     return;
   }
+  else if (!timerIsRunning()) {
+    setAllPixels(0, 0, 0);
+  }
   startTimer();
 
-  setAllPixels(0, 0, 0);
-
-  for (int i = 0; i < NUM_LEDS + NUM_LEDS; i++) {
-    for (int j = 0; j < NUM_LEDS; j++) {
-      if (!meteorRandomDecay || random(10) > 5) {
-        leds[j].fadeToBlackBy(meteorTrailDecay);
-      }
-    }
-  
-    for (int j = 0; j < meteorSize; j++) {
-      int currentLed = i - j;
-      if (currentLed < NUM_LEDS && currentLed >= 0) {
-        setPixel(currentLed, red, green, blue);
-      } 
+  for (int i = 0; i < NUM_LEDS; i++) {
+    if (!meteorRandomDecay || random(10) > 5) {
+      leds[i].fadeToBlackBy(meteorTrailDecay);
     }
   }
+
+  for (int i = 0; i < meteorSize; i++) {
+    int led = currentLed - i;
+    if (led < NUM_LEDS && led >= 0) {
+      setPixel(led, red, green, blue);
+    }
+  }
+
+  meteorRainLoop();
 }
