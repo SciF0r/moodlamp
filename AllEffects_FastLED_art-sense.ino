@@ -18,17 +18,17 @@ byte selectedEffect = defaultEffect;
 void setup()
 {
   FastLED.addLeds<WS2811, PIN, GRB>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  pinMode(2, INPUT_PULLUP);  // internal pull-up resistor
+  pinMode(2, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BUTTON), changeEffect, CHANGE);
 }
 
 void loop() { 
   FastLED.setBrightness(BRIGHTNESS);
-  
+
   if (selectedEffect >= END_OF_EFFECTS) {
     selectedEffect = defaultEffect;
-  } 
-  
+  }
+
   switch(selectedEffect) {
   
     case FIRE:
@@ -187,11 +187,10 @@ void loop() {
 }
 
 void changeEffect() {
-  if (digitalRead (BUTTON) == HIGH) {
+  if (digitalRead(BUTTON) == HIGH) {
     selectedEffect++;
   }
 }
-
 
 // *************************
 // ** LEDEffect Functions **
@@ -202,9 +201,9 @@ void RGBLoop(){
     // Fade IN
     for(int k = 0; k < 256; k++) { 
       switch(j) { 
-        case 0: setAll(k,0,0); break;
-        case 1: setAll(0,k,0); break;
-        case 2: setAll(0,0,k); break;
+        case 0: setAllPixels(k,0,0); break;
+        case 1: setAllPixels(0,k,0); break;
+        case 2: setAllPixels(0,0,k); break;
       }
       showStrip();
       delay(3);
@@ -212,9 +211,9 @@ void RGBLoop(){
     // Fade OUT
     for(int k = 255; k >= 0; k--) { 
       switch(j) { 
-        case 0: setAll(k,0,0); break;
-        case 1: setAll(0,k,0); break;
-        case 2: setAll(0,0,k); break;
+        case 0: setAllPixels(k,0,0); break;
+        case 1: setAllPixels(0,k,0); break;
+        case 2: setAllPixels(0,0,k); break;
       }
       showStrip();
       delay(3);
@@ -229,7 +228,7 @@ void FadeInOut(byte red, byte green, byte blue){
     r = (k/256.0)*red;
     g = (k/256.0)*green;
     b = (k/256.0)*blue;
-    setAll(r,g,b);
+    setAllPixels(r,g,b);
     showStrip();
   }
      
@@ -237,17 +236,17 @@ void FadeInOut(byte red, byte green, byte blue){
     r = (k/256.0)*red;
     g = (k/256.0)*green;
     b = (k/256.0)*blue;
-    setAll(r,g,b);
+    setAllPixels(r,g,b);
     showStrip();
   }
 }
 
 void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause){
   for(int j = 0; j < StrobeCount; j++) {
-    setAll(red,green,blue);
+    setAllPixels(red,green,blue);
     showStrip();
     delay(FlashDelay);
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     showStrip();
     delay(FlashDelay);
   }
@@ -290,7 +289,7 @@ void HalloweenEyes(byte red, byte green, byte blue,
     }
   }
   
-  setAll(0,0,0); // Set all black
+  setAllPixels(0,0,0); // Set all black
   
   delay(EndPause);
 }
@@ -298,10 +297,10 @@ void HalloweenEyes(byte red, byte green, byte blue,
 void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay){
 
   for(int i = 0; i < NUM_LEDS-EyeSize-2; i++) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     showStrip();
@@ -311,10 +310,10 @@ void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, i
   delay(ReturnDelay);
 
   for(int i = NUM_LEDS-EyeSize-2; i > 0; i--) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     showStrip();
@@ -338,17 +337,17 @@ void NewKITT(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int R
 // used by NewKITT
 void CenterToOutside(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
   for(int i =((NUM_LEDS-EyeSize)/2); i>=0; i--) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     
     setPixel(NUM_LEDS-i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(NUM_LEDS-i-j, red, green, blue); 
+      setPixel(NUM_LEDS-i-j, red, green, blue);
     }
     setPixel(NUM_LEDS-i-EyeSize-1, red/10, green/10, blue/10);
     
@@ -361,17 +360,17 @@ void CenterToOutside(byte red, byte green, byte blue, int EyeSize, int SpeedDela
 // used by NewKITT
 void OutsideToCenter(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
   for(int i = 0; i<=((NUM_LEDS-EyeSize)/2); i++) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     
     setPixel(NUM_LEDS-i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(NUM_LEDS-i-j, red, green, blue); 
+      setPixel(NUM_LEDS-i-j, red, green, blue);
     }
     setPixel(NUM_LEDS-i-EyeSize-1, red/10, green/10, blue/10);
     
@@ -384,10 +383,10 @@ void OutsideToCenter(byte red, byte green, byte blue, int EyeSize, int SpeedDela
 // used by NewKITT
 void LeftToRight(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
   for(int i = 0; i < NUM_LEDS-EyeSize-2; i++) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     showStrip();
@@ -399,10 +398,10 @@ void LeftToRight(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, i
 // used by NewKITT
 void RightToLeft(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
   for(int i = NUM_LEDS-EyeSize-2; i > 0; i--) {
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
     setPixel(i, red/10, green/10, blue/10);
     for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue); 
+      setPixel(i+j, red, green, blue);
     }
     setPixel(i+EyeSize+1, red/10, green/10, blue/10);
     showStrip();
@@ -412,14 +411,14 @@ void RightToLeft(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, i
 }
 
 void Twinkle(byte red, byte green, byte blue, int Count, int SpeedDelay, boolean OnlyOne) {
-  setAll(0,0,0);
+  setAllPixels(0,0,0);
   
   for (int i=0; i<Count; i++) {
      setPixel(random(NUM_LEDS),red,green,blue);
      showStrip();
      delay(SpeedDelay);
      if(OnlyOne) { 
-       setAll(0,0,0); 
+       setAllPixels(0,0,0);
      }
    }
   
@@ -427,14 +426,14 @@ void Twinkle(byte red, byte green, byte blue, int Count, int SpeedDelay, boolean
 }
 
 void TwinkleRandom(int Count, int SpeedDelay, boolean OnlyOne) {
-  setAll(0,0,0);
+  setAllPixels(0,0,0);
   
   for (int i=0; i<Count; i++) {
      setPixel(random(NUM_LEDS),random(0,255),random(0,255),random(0,255));
      showStrip();
      delay(SpeedDelay);
      if(OnlyOne) { 
-       setAll(0,0,0); 
+       setAllPixels(0,0,0);
      }
    }
   
@@ -450,7 +449,7 @@ void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
 }
 
 void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay) {
-  setAll(red,green,blue);
+  setAllPixels(red,green,blue);
   
   int Pixel = random(NUM_LEDS);
   setPixel(Pixel,0xff,0xff,0xff);
@@ -571,7 +570,7 @@ void Fire(int Cooling, int Sparking, int SpeedDelay) {
   // Step 1.  Cool down every cell a little
   for (int i = 0; i < NUM_LEDS; i++) {
     cooldown = random(0, ((Cooling * 10) / NUM_LEDS) + 2);
-    
+
     if (cooldown > heat[i]) {
       heat[i] = 0;
     }
@@ -579,12 +578,12 @@ void Fire(int Cooling, int Sparking, int SpeedDelay) {
       heat[i] = heat[i] - cooldown;
     }
   }
-  
+
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
   for (int k = NUM_LEDS - 1; k >= 2; k--) {
     heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
   }
-    
+
   // Step 3.  Randomly ignite new 'sparks' near the bottom
   if (random(255) < Sparking) {
     int y = random(7);
@@ -635,11 +634,11 @@ void BouncingColoredBalls(int BallCount, byte colors[][3], boolean continuous) {
   for (int i = 0 ; i < BallCount ; i++) {   
     ClockTimeSinceLastBounce[i] = millis();
     Height[i] = StartHeight;
-    Position[i] = 0; 
+    Position[i] = 0;
     ImpactVelocity[i] = ImpactVelocityStart;
     TimeSinceLastBounce[i] = 0;
     Dampening[i] = 0.90 - float(i)/pow(BallCount,2);
-    ballBouncing[i]=true; 
+    ballBouncing[i]=true;
   }
 
   while (ballsStillBouncing) {
@@ -672,30 +671,28 @@ void BouncingColoredBalls(int BallCount, byte colors[][3], boolean continuous) {
     }
     
     showStrip();
-    setAll(0,0,0);
+    setAllPixels(0,0,0);
   }
 }
 
 void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
-  setAll(0,0,0);
-  
-  for(int i = 0; i < NUM_LEDS+NUM_LEDS; i++) {
-    
-    
+  setAllPixels(0, 0, 0);
+
+  for (int i=0; i < NUM_LEDS+NUM_LEDS; i++) {
     // fade brightness all LEDs one step
-    for(int j=0; j<NUM_LEDS; j++) {
-      if( (!meteorRandomDecay) || (random(10)>5) ) {
-        fadeToBlack(j, meteorTrailDecay );        
+    for (int j=0; j<NUM_LEDS; j++) {
+      if (!meteorRandomDecay || random(10) > 5) {
+        fadeToBlack(j, meteorTrailDecay);
       }
     }
-    
+
     // draw meteor
-    for(int j = 0; j < meteorSize; j++) {
-      if( ( i-j <NUM_LEDS) && (i-j>=0) ) {
+    for (int j=0; j<meteorSize; j++) {
+      if(i-j < NUM_LEDS && i-j >= 0) {
         setPixel(i-j, red, green, blue);
       } 
     }
-   
+
     showStrip();
     delay(SpeedDelay);
   }
@@ -726,44 +723,33 @@ void fadeToBlack(int ledNo, byte fadeValue) {
  #endif  
 }
 
-// *** REPLACE TO HERE ***
-
-
-
 // ***************************************
 // ** FastLed/NeoPixel Common Functions **
 // ***************************************
 
-// Apply LED color changes
 void showStrip() {
- #ifdef ADAFRUIT_NEOPIXEL_H 
-   // NeoPixel
-   strip.show();
- #endif
- #ifndef ADAFRUIT_NEOPIXEL_H
-   // FastLED
-   FastLED.show();
- #endif
+  #ifdef ADAFRUIT_NEOPIXEL_H 
+  strip.show();
+  #endif
+  #ifndef ADAFRUIT_NEOPIXEL_H
+  FastLED.show();
+  #endif
 }
 
-// Set a LED color (not yet visible)
 void setPixel(int Pixel, byte red, byte green, byte blue) {
- #ifdef ADAFRUIT_NEOPIXEL_H 
-   // NeoPixel
-   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
- #endif
- #ifndef ADAFRUIT_NEOPIXEL_H 
-   // FastLED
-   leds[Pixel].r = red;
-   leds[Pixel].g = green;
-   leds[Pixel].b = blue;
- #endif
+  #ifdef ADAFRUIT_NEOPIXEL_H 
+  strip.setPixelColor(Pixel, strip.Color(red, green, blue));
+  #endif
+  #ifndef ADAFRUIT_NEOPIXEL_H 
+  leds[Pixel].r = red;
+  leds[Pixel].g = green;
+  leds[Pixel].b = blue;
+  #endif
 }
 
-// Set all LEDs to a given color and apply it (visible)
-void setAll(byte red, byte green, byte blue) {
-  for(int i = 0; i < NUM_LEDS; i++ ) {
-    setPixel(i, red, green, blue); 
+void setAllPixels(byte red, byte green, byte blue) {
+  for(int i = 0; i < NUM_LEDS; i++) {
+    setPixel(i, red, green, blue);
   }
   showStrip();
 }
