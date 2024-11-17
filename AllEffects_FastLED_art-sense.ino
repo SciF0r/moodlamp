@@ -10,9 +10,11 @@ enum Effect {
   FIRE,
   LGBTQ,
   RAINBOW,
+  METEOR_RAIN,
+  TEST,
   END_OF_EFFECTS
 };
-byte defaultEffect = FIRE;
+byte defaultEffect = TEST;
 byte selectedEffect = defaultEffect;
 
 void setup()
@@ -60,14 +62,14 @@ void loop() {
       break;
     }
 
-    // case 0  : {
-    //             meteorRain(0x25, 0x00, 0x05, 10, 64, true, 30);
-    //             break;
-    //           }
-
-
-              
-
+    case METEOR_RAIN: {
+      int meteorSize = 10;
+      int trailDecay = 64;
+      bool randomTrailDecay = true;
+      int speedDelay = 30;
+      meteorRain(0x25, 0x00, 0x05, meteorSize, trailDecay, randomTrailDecay, speedDelay);
+      break;
+    }
 
     // case 3  : {
     //             // HalloweenEyes - Color (red, green, blue), Size of eye, space between eyes, fade (true/false), steps, fade delay, end pause
