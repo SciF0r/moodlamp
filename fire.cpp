@@ -59,7 +59,6 @@ void ignite(int sparking) {
 }
 
 void fire(int cooling, int sparking, int speedDelay) {
-  Serial.println(speedDelay);
   if (!timerIsRunning()) {
     startTimer();
   }
