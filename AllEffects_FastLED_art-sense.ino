@@ -5,7 +5,9 @@
 #include "lgbtq.h"
 #include "meteor_rain.h"
 #include "rainbow.h"
+#include "running_lights.h"
 #include "timer.h"
+#include "twinkle.h"
 
 #define BUTTON 2
 #define BRIGHTNESS 100
@@ -19,10 +21,14 @@ enum Effect {
   RAINBOW_CYCLE,
   //RAINBOW_THEATER_CHASE,
   METEOR_RAIN,
-  // TEST,
+  TWINKLE,
+  TWINKLE_RANDOM,
+  TWINKLE_RANDOM_SINGLE,
+  RUNNING_LIGHTS,
+  TEST,
   END_OF_EFFECTS
 };
-static byte defaultEffect = FIRE;
+static byte defaultEffect = TEST;
 static byte selectedEffect = defaultEffect;
 
 void setup()
@@ -75,73 +81,36 @@ void loop() {
       break;
     }
 
-    // case TEST: {
-    //             // HalloweenEyes - Color (red, green, blue), Size of eye, space between eyes, fade (true/false), steps, fade delay, end pause
-    //             HalloweenEyes(0xff, 0x00, 0x00, 
-    //                           1, 4, 
-    //                           true, random(5,50), random(50,150), 
-    //                           random(1000, 10000));
-    //             HalloweenEyes(0xff, 0x00, 0x00, 
-    //                           1, 4, 
-    //                           true, random(5,50), random(50,150), 
-    //                           random(1000, 10000));
-    //             break;
-    //           }
-              
-    // case 4  : {
-    //             // CylonBounce - Color (red, green, blue), eye size, speed delay, end pause
-    //             CylonBounce(0xff, 0x00, 0x00, 4, 10, 50);
-    //             break;
-    //           }
-              
-    // case 5  : {
-    //             // NewKITT - Color (red, green, blue), eye size, speed delay, end pause
-    //             NewKITT(0xff, 0x00, 0x00, 8, 10, 50);
-    //             break;
-    //           }
-              
-    // case 6  : {
-    //             // Twinkle - Color (red, green, blue), count, speed delay, only one twinkle (true/false) 
-    //             Twinkle(0xff, 0x00, 0x00, 10, 100, false);
-    //             break;
-    //           }
-              
-    // case 7  : { 
-    //             // TwinkleRandom - twinkle count, speed delay, only one (true/false)
-    //             TwinkleRandom(20, 100, false);
-    //             break;
-    //           }
-              
-    // case 8  : {
-    //             // Sparkle - Color (red, green, blue), speed delay
-    //             Sparkle(0xff, 0xff, 0xff, 0);
-    //             break;
-    //           }
+    case TWINKLE: {
+      twinkle(0x25, 0x00, 0x05, 20, 400, false);
+      break;
+    }
+
+    case TWINKLE_RANDOM: {
+      twinkleRandom(20, 400, false);
+      break;
+    }
+
+    case TWINKLE_RANDOM_SINGLE: {
+      twinkleRandom(20, 200, true);
+      break;
+    }
                
-    // case 9  : {
+    // case TEST: {
     //             // SnowSparkle - Color (red, green, blue), sparkle delay, speed delay
     //             SnowSparkle(0x10, 0x10, 0x10, 20, random(100,1000));
     //             break;
     //           }
               
-    // case 10 : {
-    //             // Running Lights - Color (red, green, blue), wave dealy
-    //             RunningLights(0xff,0x00,0x00, 50);  // red
-    //             RunningLights(0xff,0xff,0xff, 50);  // white
-    //             RunningLights(0x00,0x00,0xff, 50);  // blue
-    //             break;
-    //           }
+    case RUNNING_LIGHTS: {
+                runningLights(0x25, 0x00, 0x05, 50);
+                break;
+              }
               
     // case 11 : {
     //             // colorWipe - Color (red, green, blue), speed delay
     //             colorWipe(0x00,0xff,0x00, 50);
     //             colorWipe(0x00,0x00,0x00, 50);
-    //             break;
-    //           }
-
-    // case 12 : {
-    //             // rainbowCycle - speed delay
-    //             rainbowCycle(20);
     //             break;
     //           }
 
@@ -157,16 +126,6 @@ void loop() {
     //             break;
     //           }
 
-    // case 15 : {
-    //             // Fire - Cooling rate, Sparking rate, speed delay
-    //             Fire(55,90,60);
-    //             break;
-    //           }
-
-
-    //           // simple bouncingBalls not included, since BouncingColoredBalls can perform this as well as shown below
-    //           // BouncingColoredBalls - Number of balls, color (red, green, blue) array, continuous
-    //           // CAUTION: If set to continuous then this effect will never stop!!! 
               
     // case 16 : {
     //             // mimic BouncingBalls
@@ -181,12 +140,6 @@ void loop() {
     //                                   {0xff, 0xff, 0xff}, 
     //                                   {0x00, 0x00, 0xff} };
     //             BouncingColoredBalls(3, colors, false);
-    //             break;
-    //           }
-
-    // case 18 : {
-    //             // meteorRain - Color (red, green, blue), meteor size, trail decay, random trail decay (true/false), speed delay 
-    //             meteorRain(0x25, 0x00, 0x05, 10, 64, true, 30);
     //             break;
     //           }
   }
@@ -230,8 +183,6 @@ void RGBLoop(){
   }
 }
 
-
-
 void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause){
   for(int j = 0; j < StrobeCount; j++) {
     setAllPixels(red,green,blue);
@@ -243,200 +194,6 @@ void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, in
   }
  
  delay(EndPause);
-}
-
-void HalloweenEyes(byte red, byte green, byte blue, 
-                   int EyeWidth, int EyeSpace, 
-                   boolean Fade, int Steps, int FadeDelay,
-                   int EndPause){
-  randomSeed(analogRead(0));
-  
-  int i;
-  int StartPoint  = random( 0, NUM_LEDS - (2*EyeWidth) - EyeSpace );
-  int Start2ndEye = StartPoint + EyeWidth + EyeSpace;
-  
-  for(i = 0; i < EyeWidth; i++) {
-    setPixel(StartPoint + i, red, green, blue);
-    setPixel(Start2ndEye + i, red, green, blue);
-  }
-  
-  showStrip();
-  
-  if(Fade==true) {
-    float r, g, b;
-  
-    for(int j = Steps; j >= 0; j--) {
-      r = j*(red/Steps);
-      g = j*(green/Steps);
-      b = j*(blue/Steps);
-      
-      for(i = 0; i < EyeWidth; i++) {
-        setPixel(StartPoint + i, r, g, b);
-        setPixel(Start2ndEye + i, r, g, b);
-      }
-      
-      showStrip();
-      delay(FadeDelay);
-    }
-  }
-  
-  setAllPixels(0,0,0); // Set all black
-  
-  delay(EndPause);
-}
-
-void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay){
-
-  for(int i = 0; i < NUM_LEDS-EyeSize-2; i++) {
-    setAllPixels(0,0,0);
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    showStrip();
-    delay(SpeedDelay);
-  }
-
-  delay(ReturnDelay);
-
-  for(int i = NUM_LEDS-EyeSize-2; i > 0; i--) {
-    setAllPixels(0,0,0);
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    showStrip();
-    delay(SpeedDelay);
-  }
-  
-  delay(ReturnDelay);
-}
-
-void NewKITT(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay){
-  RightToLeft(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  LeftToRight(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  OutsideToCenter(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  CenterToOutside(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  LeftToRight(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  RightToLeft(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  OutsideToCenter(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-  CenterToOutside(red, green, blue, EyeSize, SpeedDelay, ReturnDelay);
-}
-
-// used by NewKITT
-void CenterToOutside(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
-  for(int i =((NUM_LEDS-EyeSize)/2); i>=0; i--) {
-    setAllPixels(0,0,0);
-    
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    
-    setPixel(NUM_LEDS-i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(NUM_LEDS-i-j, red, green, blue);
-    }
-    setPixel(NUM_LEDS-i-EyeSize-1, red/10, green/10, blue/10);
-    
-    showStrip();
-    delay(SpeedDelay);
-  }
-  delay(ReturnDelay);
-}
-
-// used by NewKITT
-void OutsideToCenter(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
-  for(int i = 0; i<=((NUM_LEDS-EyeSize)/2); i++) {
-    setAllPixels(0,0,0);
-    
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    
-    setPixel(NUM_LEDS-i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(NUM_LEDS-i-j, red, green, blue);
-    }
-    setPixel(NUM_LEDS-i-EyeSize-1, red/10, green/10, blue/10);
-    
-    showStrip();
-    delay(SpeedDelay);
-  }
-  delay(ReturnDelay);
-}
-
-// used by NewKITT
-void LeftToRight(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
-  for(int i = 0; i < NUM_LEDS-EyeSize-2; i++) {
-    setAllPixels(0,0,0);
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    showStrip();
-    delay(SpeedDelay);
-  }
-  delay(ReturnDelay);
-}
-
-// used by NewKITT
-void RightToLeft(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
-  for(int i = NUM_LEDS-EyeSize-2; i > 0; i--) {
-    setAllPixels(0,0,0);
-    setPixel(i, red/10, green/10, blue/10);
-    for(int j = 1; j <= EyeSize; j++) {
-      setPixel(i+j, red, green, blue);
-    }
-    setPixel(i+EyeSize+1, red/10, green/10, blue/10);
-    showStrip();
-    delay(SpeedDelay);
-  }
-  delay(ReturnDelay);
-}
-
-void Twinkle(byte red, byte green, byte blue, int Count, int SpeedDelay, boolean OnlyOne) {
-  setAllPixels(0,0,0);
-  
-  for (int i=0; i<Count; i++) {
-     setPixel(random(NUM_LEDS),red,green,blue);
-     showStrip();
-     delay(SpeedDelay);
-     if(OnlyOne) { 
-       setAllPixels(0,0,0);
-     }
-   }
-  
-  delay(SpeedDelay);
-}
-
-void TwinkleRandom(int Count, int SpeedDelay, boolean OnlyOne) {
-  setAllPixels(0,0,0);
-  
-  for (int i=0; i<Count; i++) {
-     setPixel(random(NUM_LEDS),random(0,255),random(0,255),random(0,255));
-     showStrip();
-     delay(SpeedDelay);
-     if(OnlyOne) { 
-       setAllPixels(0,0,0);
-     }
-   }
-  
-  delay(SpeedDelay);
-}
-
-void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
-  int Pixel = random(NUM_LEDS);
-  setPixel(Pixel,red,green,blue);
-  showStrip();
-  delay(SpeedDelay);
-  setPixel(Pixel,0,0,0);
 }
 
 void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay) {
