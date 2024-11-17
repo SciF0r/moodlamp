@@ -1,5 +1,5 @@
 #include "FastLED.h"
-#include <EEPROM.h>
+
 #define BRIGHTNESS 100
 #define NUM_LEDS 88
 #define PIN 5 
@@ -13,7 +13,7 @@ enum Effect {
   END_OF_EFFECTS
 };
 byte defaultEffect = FIRE;
-byte selectedEffect;
+byte selectedEffect = defaultEffect;
 
 void setup()
 {
@@ -23,12 +23,10 @@ void setup()
 }
 
 void loop() { 
-  EEPROM.get(0, selectedEffect);
   FastLED.setBrightness(BRIGHTNESS);
   
   if (selectedEffect >= END_OF_EFFECTS) {
-    selectedEffect = FIRE;
-    EEPROM.put(0, selectedEffect); 
+    selectedEffect = defaultEffect;
   } 
   
   switch(selectedEffect) {
@@ -191,8 +189,6 @@ void loop() {
 void changeEffect() {
   if (digitalRead (BUTTON) == HIGH) {
     selectedEffect++;
-    EEPROM.put(0, selectedEffect);
-    asm volatile ("jmp 0");
   }
 }
 
