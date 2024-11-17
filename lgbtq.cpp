@@ -20,8 +20,8 @@ enum Direction {
 
 static byte currentDirection = FADE_IN;
 static byte currentColor = FIRST_COLOR + 1;
-const int maxSteps = 256;
 const int minSteps = 0;
+const int maxSteps = 256;
 static int currentStep = minSteps;
 
 void lgbtqLoop() {
@@ -46,9 +46,9 @@ void lgbtqLoop() {
 }
 
 void setColor(byte red, byte green, byte blue) {
-  float r = (currentStep / 256) * red;
-  float g = (currentStep / 256) * green;
-  float b = (currentStep / 256) * blue;
+  float r = (currentStep / 256.0) * red;
+  float g = (currentStep / 256.0) * green;
+  float b = (currentStep / 256.0) * blue;
   setAllPixels(r, g, b);
 }
 
