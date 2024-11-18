@@ -1,32 +1,9 @@
 #include "const.h"
 #include "led_helpers.h"
+#include "lgbtq_colors.h"
 #include "timer.h"
 
 static int currentLed = 0;
-
-enum Color {
-  HOT_PINK,
-  RED,
-  ORANGE,
-  YELLOW,
-  GREEN,
-  TURQUOISE,
-  INDIGO,
-  VIOLET,
-  LAST_COLOR
-};
-
-byte lgbtqColors[LAST_COLOR][3] = {
-  {0xe3, 0x1c, 0x79}, // HOT_PINK
-  {0xff, 0x00, 0x00}, // RED
-  {0xff, 0x50, 0x00}, // ORANGE
-  {0xff, 0x88, 0x00}, // YELLOW
-  {0x00, 0xaa, 0x00}, // GREEN
-  {0x00, 0x6e, 0x33}, // TURQUOISE
-  {0x15, 0x00, 0x80}, // INDIGO
-  {0x20, 0x00, 0x40}  // VIOLET
-};
-
 static byte currentColor = HOT_PINK;
 
 void lgbtqLoop() {

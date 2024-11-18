@@ -1,5 +1,4 @@
 #include "FastLED.h"
-#include "color_wipe.h"
 #include "const.h"
 #include "fire.h"
 #include "led_helpers.h"
@@ -8,7 +7,6 @@
 #include "rainbow.h"
 #include "running_lights.h"
 #include "timer.h"
-#include "twinkle.h"
 
 #define BUTTON 2
 #define BRIGHTNESS 100
@@ -21,9 +19,6 @@ enum Effect {
   RAINBOW_CYCLE,
   //RAINBOW_THEATER_CHASE,
   METEOR_RAIN,
-  TWINKLE,
-  TWINKLE_RANDOM,
-  TWINKLE_RANDOM_SINGLE,
   RUNNING_LIGHTS,
   TEST,
   END_OF_EFFECTS
@@ -61,7 +56,8 @@ void loop() {
 
     case LGBTQ:
       {
-        colorWipeLgbtq(50);
+        int speedDelay = 50;
+        lgbtq(speedDelay);
         break;
       }
 
@@ -82,24 +78,6 @@ void loop() {
         break;
       }
 
-    case TWINKLE:
-      {
-        twinkle(0x25, 0x00, 0x05, 20, 400, false);
-        break;
-      }
-
-    case TWINKLE_RANDOM:
-      {
-        twinkleRandom(20, 400, false);
-        break;
-      }
-
-    case TWINKLE_RANDOM_SINGLE:
-      {
-        twinkleRandom(20, 200, true);
-        break;
-      }
-
       // case TEST: {
       //             // SnowSparkle - Color (red, green, blue), sparkle delay, speed delay
       //             SnowSparkle(0x10, 0x10, 0x10, 20, random(100,1000));
@@ -108,15 +86,10 @@ void loop() {
 
     case RUNNING_LIGHTS:
       {
-        runningLights(0x25, 0x00, 0x05, 50);
+        int speedDelay = 100;
+        runningLightsLgbtq(speedDelay);
         break;
       }
-
-      case TEST: {
-                  // theatherChase - Color (red, green, blue), speed delay
-                  theaterChase(0xff,0,0,50);
-                  break;
-                }
 
 
       // case 16 : {
@@ -161,24 +134,6 @@ void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDel
   showStrip();
   delay(SpeedDelay);
 }
-
-void theaterChase(byte red, byte green, byte blue, int SpeedDelay) {
-  for (int j = 0; j < 10; j++) {  //do 10 cycles of chasing
-    for (int q = 0; q < 3; q++) {
-      for (int i = 0; i < NUM_LEDS; i = i + 3) {
-        setPixel(i + q, red, green, blue);  //turn every third pixel on
-      }
-      showStrip();
-
-      delay(SpeedDelay);
-
-      for (int i = 0; i < NUM_LEDS; i = i + 3) {
-        setPixel(i + q, 0, 0, 0);  //turn every third pixel off
-      }
-    }
-  }
-}
-
 
 
 void BouncingColoredBalls(int BallCount, byte colors[][3], boolean continuous) {
