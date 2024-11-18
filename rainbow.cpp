@@ -32,10 +32,7 @@ byte* wheelColor(int ledPosition) {
 }
 
 void rainbowLoop() {
-  currentOffset++;
-  if (currentOffset == 256) {
-    currentOffset = 0;
-  }
+  currentOffset = (currentOffset + 1) % 256;
 }
 
 void rainbowCycle(int speedDelay) {

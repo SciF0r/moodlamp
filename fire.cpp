@@ -3,7 +3,7 @@
 #include "led_helpers.h"
 #include "timer.h"
 
-byte heat[NUM_LEDS];
+static byte heat[NUM_LEDS];
 
 void setPixelHeatColor(int pixel, byte temperature) {
   // Scale 'heat' down from 0-255 to 0-191
@@ -32,7 +32,7 @@ void setPixelHeatColor(int pixel, byte temperature) {
 void cool_down(int cooling) {
   int cooldown;
   for (int i = 0; i < NUM_LEDS; i++) {
-    cooldown = random(0, ((cooling * 10) / NUM_LEDS) + 2);
+    cooldown = random(0, (cooling * 10 / NUM_LEDS) + 2);
 
     if (cooldown > heat[i]) {
       heat[i] = 0;
@@ -45,16 +45,16 @@ void cool_down(int cooling) {
 
 // Heat from each cell drifts up and diffuses a little
 void heat_up() {
-  for (int k = NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+  for (int i = NUM_LEDS - 1; i >= 2; i--) {
+    heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2]) / 3;
   }
 }
 
 // Randomly ignite new sparks near the bottom
 void ignite(int sparking) {
   if (random(255) < sparking) {
-    int y = random(7);
-    heat[y] = heat[y] + random(160, 255);
+    int randomBottomLed = random(7);
+    heat[randomBottomLed] += random(160, 255);
   }
 }
 
@@ -68,7 +68,7 @@ void fire(int cooling, int sparking, int speedDelay) {
   heat_up();
   ignite(sparking);
 
-  for (int j = 0; j < NUM_LEDS; j++) {
-    setPixelHeatColor(j, heat[j]);
+  for (int i = 0; i < NUM_LEDS; i++) {
+    setPixelHeatColor(i, heat[i]);
   }
 }

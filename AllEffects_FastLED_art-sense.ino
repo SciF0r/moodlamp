@@ -1,4 +1,5 @@
 #include "FastLED.h"
+#include "color_wipe.h"
 #include "const.h"
 #include "fire.h"
 #include "led_helpers.h"
@@ -15,7 +16,6 @@
 #define LED_TYPE WS2812
 
 enum Effect {
-  START_OF_EFFECTS,
   FIRE,
   LGBTQ,
   RAINBOW_CYCLE,
@@ -28,8 +28,8 @@ enum Effect {
   TEST,
   END_OF_EFFECTS
 };
-static byte defaultEffect = TEST;
-static byte selectedEffect = defaultEffect;
+static byte selectedEffect = FIRE;
+static bool effectChanged = false;
 
 void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, GRB>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -42,8 +42,10 @@ void setup() {
 void loop() {
   FastLED.setBrightness(BRIGHTNESS);
 
-  if (selectedEffect >= END_OF_EFFECTS) {
-    selectedEffect = START_OF_EFFECTS + 1;
+  if (effectChanged) {
+    stopTimer();
+    setAllPixels(0, 0, 0);
+    effectChanged = false;
   }
 
   switch (selectedEffect) {
@@ -52,14 +54,14 @@ void loop() {
       {
         int coolingRate = 55;
         int sparkingRate = 90;
-        int speedDelay = 60;
+        int speedDelay = 120;
         fire(coolingRate, sparkingRate, speedDelay);
         break;
       }
 
     case LGBTQ:
       {
-        lgbtq();
+        colorWipeLgbtq(50);
         break;
       }
 
@@ -110,24 +112,11 @@ void loop() {
         break;
       }
 
-      // case 11 : {
-      //             // colorWipe - Color (red, green, blue), speed delay
-      //             colorWipe(0x00,0xff,0x00, 50);
-      //             colorWipe(0x00,0x00,0x00, 50);
-      //             break;
-      //           }
-
-      // case 13 : {
-      //             // theatherChase - Color (red, green, blue), speed delay
-      //             theaterChase(0xff,0,0,50);
-      //             break;
-      //           }
-
-      // case 14 : {
-      //             // theaterChaseRainbow - Speed delay
-      //             theaterChaseRainbow(50);
-      //             break;
-      //           }
+      case TEST: {
+                  // theatherChase - Color (red, green, blue), speed delay
+                  theaterChase(0xff,0,0,50);
+                  break;
+                }
 
 
       // case 16 : {
@@ -152,52 +141,14 @@ void loop() {
 
 void changeEffect() {
   if (digitalRead(BUTTON) == HIGH) {
-    selectedEffect++;
-    stopTimer();
+    selectedEffect = (selectedEffect + 1) % END_OF_EFFECTS;
+    effectChanged = true;
   }
 }
 
 // *************************
 // ** LEDEffect Functions **
 // *************************
-
-void RGBLoop() {
-  for (int j = 0; j < 3; j++) {
-    // Fade IN
-    for (int k = 0; k < 256; k++) {
-      switch (j) {
-        case 0: setAllPixels(k, 0, 0); break;
-        case 1: setAllPixels(0, k, 0); break;
-        case 2: setAllPixels(0, 0, k); break;
-      }
-      showStrip();
-      delay(3);
-    }
-    // Fade OUT
-    for (int k = 255; k >= 0; k--) {
-      switch (j) {
-        case 0: setAllPixels(k, 0, 0); break;
-        case 1: setAllPixels(0, k, 0); break;
-        case 2: setAllPixels(0, 0, k); break;
-      }
-      showStrip();
-      delay(3);
-    }
-  }
-}
-
-void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause) {
-  for (int j = 0; j < StrobeCount; j++) {
-    setAllPixels(red, green, blue);
-    showStrip();
-    delay(FlashDelay);
-    setAllPixels(0, 0, 0);
-    showStrip();
-    delay(FlashDelay);
-  }
-
-  delay(EndPause);
-}
 
 void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay) {
   setAllPixels(red, green, blue);
@@ -210,37 +161,6 @@ void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDel
   showStrip();
   delay(SpeedDelay);
 }
-
-void RunningLights(byte red, byte green, byte blue, int WaveDelay) {
-  int Position = 0;
-
-  for (int i = 0; i < NUM_LEDS * 2; i++) {
-    Position++;  // = 0; //Position + Rate;
-    for (int i = 0; i < NUM_LEDS; i++) {
-      // sine wave, 3 offset waves make a rainbow!
-      //float level = sin(i+Position) * 127 + 128;
-      //setPixel(i,level,0,0);
-      //float level = sin(i+Position) * 127 + 128;
-      setPixel(i, ((sin(i + Position) * 127 + 128) / 255) * red,
-               ((sin(i + Position) * 127 + 128) / 255) * green,
-               ((sin(i + Position) * 127 + 128) / 255) * blue);
-    }
-
-    showStrip();
-    delay(WaveDelay);
-  }
-}
-
-void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
-  for (uint16_t i = 0; i < NUM_LEDS; i++) {
-    setPixel(i, red, green, blue);
-    showStrip();
-    delay(SpeedDelay);
-  }
-}
-
-// used by rainbowCycle and theaterChaseRainbow
-
 
 void theaterChase(byte red, byte green, byte blue, int SpeedDelay) {
   for (int j = 0; j < 10; j++) {  //do 10 cycles of chasing

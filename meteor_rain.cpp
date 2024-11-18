@@ -6,10 +6,7 @@ static int currentLed = 0;
 const int distanceBetweenMeteors = NUM_LEDS/2;
 
 void meteorRainLoop() {
-  currentLed++;
-  if (currentLed == NUM_LEDS + distanceBetweenMeteors) {
-    currentLed = 0;
-  }
+  currentLed = (currentLed + 1) % (NUM_LEDS + distanceBetweenMeteors);
 }
 
 void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, bool meteorRandomDecay, int speedDelay) {

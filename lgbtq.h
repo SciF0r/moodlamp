@@ -1,1 +1,1 @@
-void lgbtq();
+void lgbtq(int speedDelay);
