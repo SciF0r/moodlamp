@@ -17,13 +17,12 @@ enum Effect {
   FIRE,
   LGBTQ,
   RAINBOW_CYCLE,
-  //RAINBOW_THEATER_CHASE,
+  RAINBOW_THEATER_CHASE,
   METEOR_RAIN,
   RUNNING_LIGHTS,
-  TEST,
   END_OF_EFFECTS
 };
-static byte selectedEffect = TEST;
+static byte selectedEffect = FIRE;
 static bool effectChanged = false;
 
 void setup() {
@@ -65,6 +64,13 @@ void loop() {
       {
         int speedDelay = 20;
         rainbowCycle(speedDelay);
+        break;
+      }
+
+    case RAINBOW_THEATER_CHASE:
+      {
+        int speedDelay = 200;
+        rainbowTheaterChase(speedDelay);
         break;
       }
 

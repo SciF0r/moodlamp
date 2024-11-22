@@ -7,6 +7,7 @@ const byte green = 1;
 const byte blue = 2;
 
 static byte currentOffset = 0;
+static byte chaseOffset = 0;
 
 byte* wheelColor(int ledPosition) {
   byte wheelPosition = (ledPosition + currentOffset) % 256;
@@ -51,23 +52,29 @@ void rainbowCycle(int speedDelay) {
   rainbowLoop();
 }
 
+void rainbowTheaterChaseLoop() {
+  chaseOffset = (chaseOffset + 1) % 3;
+  if (chaseOffset == 0) {
+    currentOffset = (currentOffset + 1) % 256;
+  }
+}
+
 void rainbowTheaterChase(int speedDelay) {
-  // See https://www.tweaking4all.com/hardware/arduino/arduino-all-ledstrip-effects-in-one/ for fixing
-  // if (timerIsRunning() && !intervalHasPassed(speedDelay)) {
-  //   return;
-  // }
-  // startTimer();
+  if (!timerIsRunning()) {
+    currentOffset = 0;
+  }
+  if (timerIsRunning() && !intervalHasPassed(speedDelay)) {
+    return;
+  }
+  startTimer();
 
-  // byte* color;
-  // for (int q=0; q<3; q++) {    
-  //     for (int ledIndex=0; ledIndex<NUM_LEDS; ledIndex+=3) {
-  //       color = wheelColor(ledIndex);
-  //       byte ledQ = ledIndex + q;
-  //       setPixel(ledQ, color[red], color[green], color[blue]);
-  //       setPixel((ledQ - 1) % NUM_LEDS, 0, 0, 0);
-  //       delay(speedDelay);
-  //     }
-  // }
+  byte* color;
+  for (int ledIndex = 0; ledIndex < NUM_LEDS; ledIndex += 3) {
+    color = wheelColor(ledIndex);
+    byte ledWithStep = (ledIndex + chaseOffset) % NUM_LEDS;
+    setPixel(ledWithStep, color[red], color[green], color[blue]);
+    setPixel((ledWithStep - 1) % NUM_LEDS, 0, 0, 0);
+  }
 
-  // rainbowLoop();
+  rainbowTheaterChaseLoop();
 }
