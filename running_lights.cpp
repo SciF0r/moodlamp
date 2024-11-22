@@ -8,6 +8,9 @@ static int currentColor = HOT_PINK;
 
 void runningLightsLoop() {
   currentLed = (currentLed + 1) % NUM_LEDS;
+  if (currentLed == 0) {
+    currentColor = (currentColor + 1) % LAST_COLOR;
+  }
 }
 
 void runningLights(byte red, byte green, byte blue, int speedDelay) {
@@ -30,14 +33,7 @@ void runningLights(byte red, byte green, byte blue, int speedDelay) {
   runningLightsLoop();
 }
 
-void runningLightsLgbtqLoop() {
-  if (currentLed == 0) {
-    currentColor = (currentColor + 1) % LAST_COLOR;
-  }
-}
-
 void runningLightsLgbtq(int speedDelay) {
   byte *color = lgbtqColors[currentColor];
   runningLights(color[0], color[1], color[2], speedDelay);
-  runningLightsLgbtqLoop();
 }
